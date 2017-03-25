@@ -32,7 +32,7 @@ class PtpimgUploader:
             import pyperclip
             pyperclip.copy(image_url)
         except ImportError:
-            print("pyperclip not found. To copy link to cliboard please install it.")
+            pass
 
     def __perform(self, data, files):
         # Compose request
