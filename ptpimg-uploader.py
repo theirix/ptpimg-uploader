@@ -68,7 +68,13 @@ class PtpimgUploader:
             print('Unknown image file type', mime_type)
             exit(1)
 
-        self.__perform(None, {'file-upload[0]': (os.path.basename(filename), file_data, mime_type)})
+        file_name = os.path.basename(filename)
+        try:
+            file_name.encode('latin-1')
+        except UnicodeEncodeError:
+            file_name = 'justfilename'
+
+        self.__perform(None, {'file-upload[0]': (file_name, file_data, mime_type)})
 
     def upload_url(self, url):
         """ Upload an image URL using form """
