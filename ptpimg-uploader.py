@@ -44,10 +44,13 @@ class PtpimgUploader:
 
         resp = requests.post(url, headers=headers, data=full_data, files=files)
         # pylint: disable=no-member
-        if resp.status_code == requests.codes.ok and resp.json():
-            #print('Successful response', r.json())
-            # r.json() is like this: [{'code': 'ulkm79', 'ext': 'jpg'}]
-            self.__handle_result(resp.json())
+        if resp.status_code == requests.codes.ok:
+            try:
+                #print('Successful response', r.json())
+                # r.json() is like this: [{'code': 'ulkm79', 'ext': 'jpg'}]
+                self.__handle_result(resp.json())
+            except ValueError as e:
+                print(('Failed decoding body:\n{0}\n{1}').format(str(e), repr(resp.content)))
         else:
             print(('Failed. Status {0}:\n{1}').format(resp.status_code, resp.content))
             exit(1)
