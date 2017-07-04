@@ -32,7 +32,7 @@ class PtpimgUploader:
     @staticmethod
     def _handle_result(res):
         image_url = 'https://ptpimg.me/{0}.{1}'.format(
-            res[0]['code'], res[0]['ext'])
+            res['code'], res['ext'])
         return image_url
 
     def _perform(self, files=None, **data):
@@ -47,7 +47,7 @@ class PtpimgUploader:
             try:
                 # print('Successful response', r.json())
                 # r.json() is like this: [{'code': 'ulkm79', 'ext': 'jpg'}]
-                return self._handle_result(resp.json())
+                return [self._handle_result(r) for r in resp.json()]
             except ValueError as e:
                 raise UploadFailed(
                     'Failed decoding body:\n{0}\n{1!r}', e, resp.content
@@ -56,34 +56,56 @@ class PtpimgUploader:
             raise UploadFailed(
                 'Failed. Status {0}:\n{1}', resp.status_code, resp.content)
 
-    def upload_file(self, filename):
-        """ Upload a file using form """
-        mime_type, _ = mimetypes.guess_type(filename)
-        if not mime_type or mime_type.split('/')[0] != 'image':
-            raise ValueError('Unknown image file type {}'.format(mime_type))
+    def upload_files(self, *filenames):
+        """ Upload files using form """
+        # The ExitStack closes files for us when the with block exits
+        with contextlib.ExitStack() as stack:
+            files = {}
+            for i, filename in enumerate(filenames):
+                open_file = stack.enter_context(open(filename, 'rb'))
+                mime_type, _ = mimetypes.guess_type(filename)
+                if not mime_type or mime_type.split('/')[0] != 'image':
+                    raise ValueError(
+                        'Unknown image file type {}'.format(mime_type))
 
-        name = os.path.basename(filename)
-        try:
-            # until https://github.com/shazow/urllib3/issues/303 is resolved,
-            # only use the filename if it is Latin-1 safe
-            name.encode('latin1')
-        except UnicodeEncodeError:
-            name = 'justfilename'
-        with open(filename, 'rb') as f:
-            return self._perform({'file-upload[0]': (name, f, mime_type)})
+                name = os.path.basename(filename)
+                try:
+                    # until https://github.com/shazow/urllib3/issues/303 is
+                    # resolved, only use the filename if it is Latin-1 safe
+                    name.encode('latin1')
+                except UnicodeEncodeError:
+                    name = 'justfilename'
+                files['file-upload[{}]'.format(i)] = (
+                    name, open_file, mime_type)
+            return self._perform(files=files)
 
-    def upload_url(self, url):
-        """ Upload an image URL using form """
-        return self._perform(**{'link-upload': url})
+    def upload_urls(self, *urls):
+        """ Upload image URLs using form """
+        return self._perform(**{'link-upload': '\n'.join(urls)})
 
 
-def upload(api_key, file_or_url):
-    if os.path.exists(file_or_url):
-        return PtpimgUploader(api_key).upload_file(file_or_url)
-    elif file_or_url.startswith('http'):
-        return PtpimgUploader(api_key).upload_url(file_or_url)
-    else:
-        raise ValueError('Not an existing file or image URL: {}'.format(file_or_url))
+def _partition(files_or_urls):
+    files, urls = [], []
+    for file_or_url in files_or_urls:
+        if os.path.exists(file_or_url):
+            files.append(file_or_url)
+        elif file_or_url.startswith('http'):
+            urls.append(file_or_url)
+        else:
+            raise ValueError(
+                'Not an existing file or image URL: {}'.format(file_or_url))
+    return files, urls
+
+
+def upload(api_key, files_or_urls):
+    uploader = PtpimgUploader(api_key)
+    files, urls = _partition(files_or_urls)
+    results = []
+    if files:
+        results += uploader.upload_files(*files)
+    if urls:
+        results += uploader.upload_urls(*urls)
+    return results
 
 
 def main():
@@ -95,7 +117,7 @@ def main():
         pyperclip = None
 
     parser = argparse.ArgumentParser(description="PTPImg uploader")
-    parser.add_argument('image', metavar='filename|url')
+    parser.add_argument('images', metavar='filename|url', nargs='+')
     parser.add_argument(
         '-k', '--api-key', default=os.environ.get('PTPIMG_API_KEY'),
         help='PTPImg API key (or set the PTPIMG_API_KEY environment variable)')
@@ -110,8 +132,8 @@ def main():
     if not args.api_key:
         parser.error('Please specify an API key')
     try:
-        image_url = upload(args.api_key, args.image)
-        print(image_url)
+        image_urls = upload(args.api_key, args.images)
+        print(*image_urls, sep='\n')
         # Copy to clipboard if possible
         if getattr(args, 'clipboard', False):
             pyperclip.copy('\n'.join(image_urls))

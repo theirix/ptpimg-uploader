@@ -23,4 +23,12 @@ To rehost an imgur image:
     python3 ptpimg-uploader.py https://i.imgur.com/eaT6j3X.jpg
 
 An uploaded URL will be printed to the console.
+
 If pyperclip python package is installed, the URL will be additionally copied to the clipboard.
+
+You can specify multiple files and URLs on the command line:
+
+    python3 ptpimg-uploader.py ~/seed/mytorrent/folder.jpg https://i.imgur.com/eaT6j3X.jpg
+
+The resulting URLs are printed each on separate line, and copied to your
+clipboard with newlines in between.
