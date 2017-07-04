@@ -13,6 +13,18 @@ import os
 import mimetypes
 import requests
 
+
+try:
+    import pyperclip
+except ImportError:
+    # noop version
+    class pyperclip:
+        def copy(url): pass
+
+
+mimetypes.init()
+
+
 class PtpimgUploader:
     """ Upload image or image URL to the ptpimg.me image hosting """
 
@@ -21,64 +33,57 @@ class PtpimgUploader:
         self.api_key = os.getenv('PTPIMG_API_KEY')
         if not self.api_key:
             print('Cannot evaluate PTPIMG_API_KEY env variable')
-            exit(1)
+            sys.exit(1)
 
     @staticmethod
-    def __handle_result(json):
-        image_url = 'https://ptpimg.me/{0}.{1}'.format(json[0]['code'], json[0]['ext'])
+    def _handle_result(res):
+        image_url = 'https://ptpimg.me/{0}.{1}'.format(
+            res[0]['code'], res[0]['ext'])
         print(image_url)
         # Copy to clipboard if possible
-        try:
-            import pyperclip
-            pyperclip.copy(image_url)
-        except ImportError:
-            pass
+        pyperclip.copy(image_url)
 
-    def __perform(self, data, files):
+    def _perform(self, files=None, **data):
         # Compose request
         headers = {'referer': 'https://ptpimg.me/index.php'}
-        full_data = {'api_key': self.api_key}
-        if data:
-            full_data.update(data)
+        data['api_key'] = self.api_key
         url = 'https://ptpimg.me/upload.php'
 
-        resp = requests.post(url, headers=headers, data=full_data, files=files)
+        resp = requests.post(url, headers=headers, data=data, files=files)
         # pylint: disable=no-member
         if resp.status_code == requests.codes.ok:
             try:
-                #print('Successful response', r.json())
+                # print('Successful response', r.json())
                 # r.json() is like this: [{'code': 'ulkm79', 'ext': 'jpg'}]
-                self.__handle_result(resp.json())
+                self._handle_result(resp.json())
             except ValueError as e:
-                print(('Failed decoding body:\n{0}\n{1}').format(str(e), repr(resp.content)))
+                print('Failed decoding body:\n{0}\n{1!r}'.format(
+                    e, resp.content))
         else:
-            print(('Failed. Status {0}:\n{1}').format(resp.status_code, resp.content))
-            exit(1)
+            print('Failed. Status {0}:\n{1}'.format(
+                resp.status_code, resp.content))
+            sys.exit(1)
 
     def upload_file(self, filename):
         """ Upload a file using form """
-        file_data = open(filename, 'rb')
-        if not file_data:
-            print('Cannot open file', filename)
-            exit(1)
-
-        mimetypes.init()
         mime_type, _ = mimetypes.guess_type(filename)
         if not mime_type or mime_type.split('/')[0] != 'image':
             print('Unknown image file type', mime_type)
-            exit(1)
+            sys.exit(1)
 
-        file_name = os.path.basename(filename)
+        name = os.path.basename(filename)
         try:
-            file_name.encode('latin-1')
+            # until https://github.com/shazow/urllib3/issues/303 is resolved,
+            # only use the filename if it is Latin-1 safe
+            name.encode('latin1')
         except UnicodeEncodeError:
-            file_name = 'justfilename'
-
-        self.__perform(None, {'file-upload[0]': (file_name, file_data, mime_type)})
+            name = 'justfilename'
+        with open(filename, 'rb') as f:
+            self._perform({'file-upload[0]': (name, f, mime_type)})
 
     def upload_url(self, url):
         """ Upload an image URL using form """
-        self.__perform({'link-upload': url}, None)
+        self._perform(**{'link-upload': url})
 
 
 USAGE = 'Usage: {0} filename|url'.format(sys.argv[0])
@@ -86,13 +91,13 @@ USAGE = 'Usage: {0} filename|url'.format(sys.argv[0])
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print(USAGE)
-        exit(1)
+        sys.exit(1)
 
     arg = sys.argv[1]
-    if arg and os.path.exists(arg):
+    if os.path.exists(arg):
         PtpimgUploader().upload_file(arg)
-    elif arg and arg[0:4] == 'http':
+    elif arg.startswith('http'):
         PtpimgUploader().upload_url(arg)
     else:
         print(USAGE)
-        exit(1)
+        sys.exit(1)
