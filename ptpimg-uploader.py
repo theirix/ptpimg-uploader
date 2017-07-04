@@ -8,7 +8,7 @@ Usage:
     python3 ptpimg-uploader.py https://i.imgur.com/00000.jpg
 """
 
-import sys
+import contextlib
 import os
 import mimetypes
 import requests
@@ -87,19 +87,18 @@ def upload(api_key, file_or_url):
 
 
 def main():
-    USAGE = 'Usage: {0} filename|url'.format(sys.argv[0])
-    if len(sys.argv) != 2:
-        print(USAGE)
-        sys.exit(1)
+    import argparse
+
+    parser = argparse.ArgumentParser(description="PTPImg uploader")
+    parser.add_argument('image', metavar='filename|url')
 
     # Get api key from env var
     if 'PTPIMG_API_KEY' not in os.environ:
-        print('Cannot evaluate PTPIMG_API_KEY env variable')
-        sys.exit(1)
+        parser.error('Cannot evaluate PTPIMG_API_KEY env variable')
 
-    arg = sys.argv[1]
+    args = parser.parse_args()
     try:
-        image_url = upload(os.environ['PTPIMG_API_KEY'], arg)
+        image_url = upload(os.environ['PTPIMG_API_KEY'], args.image)
         print(image_url)
         # Copy to clipboard if possible
         try:
@@ -107,12 +106,8 @@ def main():
             pyperclip.copy(image_url)
         except ImportError:
             pass
-    except ValueError:
-        print(USAGE)
-        sys.exit(1)
-    except UploadFailed as e:
-        print(e)
-        sys.exit(1)
+    except (UploadFailed, ValueError) as e:
+        parser.error(str(e))
 
 
 if __name__ == '__main__':
