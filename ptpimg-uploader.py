@@ -89,11 +89,21 @@ def upload(api_key, file_or_url):
 def main():
     import argparse
 
+    try:
+        import pyperclip
+    except ImportError:
+        pyperclip = None
+
     parser = argparse.ArgumentParser(description="PTPImg uploader")
     parser.add_argument('image', metavar='filename|url')
     parser.add_argument(
         '-k', '--api-key', default=os.environ.get('PTPIMG_API_KEY'),
         help='PTPImg API key (or set the PTPIMG_API_KEY environment variable)')
+    if pyperclip is not None:
+        parser.add_argument(
+            '-n', '--dont-copy', action='store_false', default=True,
+            dest='clipboard',
+            help='Do not copy the resulting URLs to the clipboard')
 
     args = parser.parse_args()
 
@@ -103,11 +113,8 @@ def main():
         image_url = upload(args.api_key, args.image)
         print(image_url)
         # Copy to clipboard if possible
-        try:
-            import pyperclip
-            pyperclip.copy(image_url)
-        except ImportError:
-            pass
+        if getattr(args, 'clipboard', False):
+            pyperclip.copy('\n'.join(image_urls))
     except (UploadFailed, ValueError) as e:
         parser.error(str(e))
 
