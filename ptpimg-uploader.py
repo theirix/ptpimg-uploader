@@ -14,34 +14,26 @@ import mimetypes
 import requests
 
 
-try:
-    import pyperclip
-except ImportError:
-    # noop version
-    class pyperclip:
-        def copy(url): pass
-
-
 mimetypes.init()
+
+
+class UploadFailed(Exception):
+    def __str__(self):
+        msg, *args = self.args
+        return msg.format(*args)
 
 
 class PtpimgUploader:
     """ Upload image or image URL to the ptpimg.me image hosting """
 
-    def __init__(self):
-        # Get api key from env var
-        self.api_key = os.getenv('PTPIMG_API_KEY')
-        if not self.api_key:
-            print('Cannot evaluate PTPIMG_API_KEY env variable')
-            sys.exit(1)
+    def __init__(self, api_key):
+        self.api_key = api_key
 
     @staticmethod
     def _handle_result(res):
         image_url = 'https://ptpimg.me/{0}.{1}'.format(
             res[0]['code'], res[0]['ext'])
-        print(image_url)
-        # Copy to clipboard if possible
-        pyperclip.copy(image_url)
+        return image_url
 
     def _perform(self, files=None, **data):
         # Compose request
@@ -55,21 +47,20 @@ class PtpimgUploader:
             try:
                 # print('Successful response', r.json())
                 # r.json() is like this: [{'code': 'ulkm79', 'ext': 'jpg'}]
-                self._handle_result(resp.json())
+                return self._handle_result(resp.json())
             except ValueError as e:
-                print('Failed decoding body:\n{0}\n{1!r}'.format(
-                    e, resp.content))
+                raise UploadFailed(
+                    'Failed decoding body:\n{0}\n{1!r}', e, resp.content
+                    ) from None
         else:
-            print('Failed. Status {0}:\n{1}'.format(
-                resp.status_code, resp.content))
-            sys.exit(1)
+            raise UploadFailed(
+                'Failed. Status {0}:\n{1}', resp.status_code, resp.content)
 
     def upload_file(self, filename):
         """ Upload a file using form """
         mime_type, _ = mimetypes.guess_type(filename)
         if not mime_type or mime_type.split('/')[0] != 'image':
-            print('Unknown image file type', mime_type)
-            sys.exit(1)
+            raise ValueError('Unknown image file type {}'.format(mime_type))
 
         name = os.path.basename(filename)
         try:
@@ -79,25 +70,50 @@ class PtpimgUploader:
         except UnicodeEncodeError:
             name = 'justfilename'
         with open(filename, 'rb') as f:
-            self._perform({'file-upload[0]': (name, f, mime_type)})
+            return self._perform({'file-upload[0]': (name, f, mime_type)})
 
     def upload_url(self, url):
         """ Upload an image URL using form """
-        self._perform(**{'link-upload': url})
+        return self._perform(**{'link-upload': url})
 
 
-USAGE = 'Usage: {0} filename|url'.format(sys.argv[0])
+def upload(api_key, file_or_url):
+    if os.path.exists(file_or_url):
+        return PtpimgUploader(api_key).upload_file(file_or_url)
+    elif file_or_url.startswith('http'):
+        return PtpimgUploader(api_key).upload_url(file_or_url)
+    else:
+        raise ValueError('Not an existing file or image URL: {}'.format(file_or_url))
 
-if __name__ == '__main__':
+
+def main():
+    USAGE = 'Usage: {0} filename|url'.format(sys.argv[0])
     if len(sys.argv) != 2:
         print(USAGE)
         sys.exit(1)
 
+    # Get api key from env var
+    if 'PTPIMG_API_KEY' not in os.environ:
+        print('Cannot evaluate PTPIMG_API_KEY env variable')
+        sys.exit(1)
+
     arg = sys.argv[1]
-    if os.path.exists(arg):
-        PtpimgUploader().upload_file(arg)
-    elif arg.startswith('http'):
-        PtpimgUploader().upload_url(arg)
-    else:
+    try:
+        image_url = upload(os.environ['PTPIMG_API_KEY'], arg)
+        print(image_url)
+        # Copy to clipboard if possible
+        try:
+            import pyperclip
+            pyperclip.copy(image_url)
+        except ImportError:
+            pass
+    except ValueError:
         print(USAGE)
         sys.exit(1)
+    except UploadFailed as e:
+        print(e)
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
