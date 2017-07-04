@@ -91,14 +91,16 @@ def main():
 
     parser = argparse.ArgumentParser(description="PTPImg uploader")
     parser.add_argument('image', metavar='filename|url')
-
-    # Get api key from env var
-    if 'PTPIMG_API_KEY' not in os.environ:
-        parser.error('Cannot evaluate PTPIMG_API_KEY env variable')
+    parser.add_argument(
+        '-k', '--api-key', default=os.environ.get('PTPIMG_API_KEY'),
+        help='PTPImg API key (or set the PTPIMG_API_KEY environment variable)')
 
     args = parser.parse_args()
+
+    if not args.api_key:
+        parser.error('Please specify an API key')
     try:
-        image_url = upload(os.environ['PTPIMG_API_KEY'], args.image)
+        image_url = upload(args.api_key, args.image)
         print(image_url)
         # Copy to clipboard if possible
         try:

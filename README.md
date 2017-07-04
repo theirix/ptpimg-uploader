@@ -6,9 +6,11 @@ Upload image file or image URL to the ptpimg.me image hosting.
 
 1. Install python3 package requests (usually apt-get install python3-requests or pip3 install requests).
 
-2. Export your ptpimg.me API key (usually in .bashrc or .zshenv):
+2. Optionally: export your ptpimg.me API key (usually in .bashrc or .zshenv):
 
     export PTPIMG_API_KEY=<your hex key>
+
+  or use the -k / --api-key command-line switch.
 
 ## How to use:
 
