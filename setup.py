@@ -17,7 +17,7 @@ setup(
     keywords = "image uploader",
     url = "https://github.com/theirix/ptpimg-uploader",
     classifiers=[
-        "Development Status :: 2 - Beta",
+        "Development Status :: 4 - Beta",
         "Topic :: Utilities",
     ],
     py_modules=['ptpimg_uploader'],
