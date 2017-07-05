@@ -13,7 +13,7 @@ setup(
     description = (
         "PTPImg uploader, handles local files and URLs, from the commandline"),
     long_description = long_description,
-    # license = "BSD",  TODO, state a license
+    license = "BSD",
     keywords = "image uploader",
     url = "https://github.com/theirix/ptpimg-uploader",
     classifiers=[
