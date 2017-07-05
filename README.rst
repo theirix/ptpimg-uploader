@@ -2,6 +2,10 @@
 ptpimg_uploader
 ===============
 
+.. image:: https://img.shields.io/pypi/v/ptpimg-uploader.svg
+   :alt: Latest release on the ptpimg-uploader (PyPI)
+   :target: https://pypi.python.org/pypi/ptpimg-uploader
+
 Upload image file or image URL to the ptpimg.me image hosting.
 
 
