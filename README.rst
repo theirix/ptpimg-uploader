@@ -39,8 +39,8 @@ You can export your ptpimg.me API key (usually in .bashrc or .zshenv) using:
 
 or use the -k / --api-key command-line switch.
 
-How to use:
-------------
+How to use
+----------
 
 Run
 
@@ -66,3 +66,13 @@ You can specify multiple files and URLs on the command line:
 
 The resulting URLs are printed each on separate line, and copied to your
 clipboard with newlines in between.
+
+License
+-------
+
+BSD
+
+Acknowledgments
+---------------
+
+ * mjpieters - a great refactoring and Python packaging
