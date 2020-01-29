@@ -9,10 +9,11 @@ Usage:
 """
 
 import contextlib
-import os
 import mimetypes
-import requests
+import os
+from io import BytesIO
 
+import requests
 
 mimetypes.init()
 
@@ -51,7 +52,7 @@ class PtpimgUploader:
             except ValueError as e:
                 raise UploadFailed(
                     'Failed decoding body:\n{0}\n{1!r}', e, resp.content
-                    ) from None
+                ) from None
         else:
             raise UploadFailed(
                 'Failed. Status {0}:\n{1}', resp.status_code, resp.content)
@@ -80,8 +81,24 @@ class PtpimgUploader:
             return self._perform(files=files)
 
     def upload_urls(self, *urls):
-        """ Upload image URLs using form """
-        return self._perform(**{'link-upload': '\n'.join(urls)})
+        """ Upload image URLs by downloading them before """
+        with contextlib.ExitStack() as stack:
+            files = {}
+            for i, url in enumerate(urls):
+                resp = requests.get(url)
+                if resp.status_code != requests.codes.ok:
+                    raise ValueError(
+                        'Cannot fetch url {} with error {}'.format(url, resp.status_code))
+
+                mime_type = resp.headers['content-type']
+                if not mime_type or mime_type.split('/')[0] != 'image':
+                    raise ValueError(
+                        'Unknown image file type {}'.format(mime_type))
+                open_file = stack.enter_context(BytesIO(resp.content))
+                files['file-upload[{}]'.format(i)] = (
+                    'file-{}'.format(i), open_file, mime_type)
+
+            return self._perform(files=files)
 
 
 def _partition(files_or_urls):
