@@ -30,4 +30,5 @@ setup(
         'pyperclip',
         'requests',
     ],
+    python_requires=">=3.3"
 )
