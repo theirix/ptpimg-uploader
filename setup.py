@@ -7,7 +7,7 @@ with open('README.rst') as desc:
 
 setup(
     name = "ptpimg_uploader",
-    version = "0.2",
+    version = "0.3",
     author = "theirix",
     author_email = "theirix@gmail.com",
     description = (
