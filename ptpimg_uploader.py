@@ -27,8 +27,9 @@ class UploadFailed(Exception):
 class PtpimgUploader:
     """ Upload image or image URL to the ptpimg.me image hosting """
 
-    def __init__(self, api_key):
+    def __init__(self, api_key, timeout=None):
         self.api_key = api_key
+        self.timeout = timeout
 
     @staticmethod
     def _handle_result(res):
@@ -42,7 +43,8 @@ class PtpimgUploader:
         data['api_key'] = self.api_key
         url = 'https://ptpimg.me/upload.php'
 
-        resp = requests.post(url, headers=headers, data=data, files=files)
+        resp = requests.post(
+            url, headers=headers, data=data, files=files, timeout=self.timeout)
         # pylint: disable=no-member
         if resp.status_code == requests.codes.ok:
             try:
@@ -85,7 +87,7 @@ class PtpimgUploader:
         with contextlib.ExitStack() as stack:
             files = {}
             for i, url in enumerate(urls):
-                resp = requests.get(url)
+                resp = requests.get(url, timeout=self.timeout)
                 if resp.status_code != requests.codes.ok:
                     raise ValueError(
                         'Cannot fetch url {} with error {}'.format(url, resp.status_code))
@@ -114,8 +116,8 @@ def _partition(files_or_urls):
     return files, urls
 
 
-def upload(api_key, files_or_urls):
-    uploader = PtpimgUploader(api_key)
+def upload(api_key, files_or_urls, timeout=None):
+    uploader = PtpimgUploader(api_key, timeout)
     files, urls = _partition(files_or_urls)
     results = []
     if files:
