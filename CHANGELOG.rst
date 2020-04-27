@@ -2,6 +2,11 @@
 Change Log
 ==========
 
+0.5 (2020-04-27)
+-----------------
+
+* Do not require pyperclip to be installed.
+
 0.4 (2020-04-27)
 -----------------
 
