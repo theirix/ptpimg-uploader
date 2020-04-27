@@ -2,9 +2,7 @@
 ptpimg_uploader
 ===============
 
-.. image:: https://img.shields.io/pypi/v/ptpimg-uploader.svg
-   :alt: Latest release on the ptpimg-uploader (PyPI)
-   :target: https://pypi.python.org/pypi/ptpimg-uploader
+|PyPI version| |Build Status| 
 
 Upload image file or image URL to the ptpimg.me image hosting.
 
@@ -28,11 +26,9 @@ Using setup.py:
 
 Manually:
 
-    Install python3 package requests (usually apt-get install python3-requests or pip3 install requests).
+  * Install python3 package ``requests`` (usually ``apt-get install python3-requests`` or ``pip3 install requests``).
 
-    If you want clipboard support, install pyperclip too.
-
-    Run the script from the command line with python3 ptimg_uploader.py
+  * If you want clipboard support, install ``pyperclip`` too.
 
 
 API key
@@ -109,4 +105,10 @@ BSD
 Acknowledgments
 ---------------
 
- * mjpieters - a great refactoring and Python packaging
+* mjpieters - a great refactoring and Python packaging
+
+
+.. |Build Status| image:: https://github.com/theirix/ptpimg-uploader/workflows/Upload%20Python%20Package/badge.svg
+   :target: https://github.com/theirix/ptpimg-uploader/actions
+.. |PyPI version| image:: https://img.shields.io/pypi/v/ptpimg-uploader.svg
+   :target: https://pypi.python.org/pypi/ptpimg-uploader
