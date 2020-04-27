@@ -68,6 +68,8 @@ If ``--bbcode`` parameter is specified, URLS will be wrapped in BBCode ``[img]``
 
 If pyperclip python package is installed, the URL will be additionally copied to the clipboard.
 
+If output is a terminal, a bell will be ringed on completion (can be disabled with a ``--nobell`` parameter).
+
 You can specify multiple files and URLs on the command line:
 
     ptpimg_uploader ~/seed/mytorrent/folder.jpg https://i.imgur.com/eaT6j3X.jpg

@@ -12,6 +12,7 @@ import contextlib
 import mimetypes
 import os
 from io import BytesIO
+from sys import stdout
 
 import requests
 
@@ -148,6 +149,9 @@ def main():
     parser.add_argument(
         '-b', '--bbcode', action='store_true', default=False,
         help='Output links in BBCode format (with [img] tags)')
+    parser.add_argument(
+        '--nobell', action='store_true', default=False,
+        help='Do not bell in a terminal on completion')
 
     args = parser.parse_args()
 
@@ -163,6 +167,10 @@ def main():
         # Copy to clipboard if possible
         if getattr(args, 'clipboard', False):
             pyperclip.copy('\n'.join(image_urls))
+        # Ring a terminal if we are in terminal and allowed to do this
+        if not args.nobell and stdout.isatty():
+            stdout.write('\a')
+            stdout.flush()
     except (UploadFailed, ValueError) as e:
         parser.error(str(e))
 
