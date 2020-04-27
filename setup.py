@@ -25,7 +25,6 @@ setup(
         ],
     },
     install_requires=[
-        'pyperclip',
         'requests',
     ],
     python_requires=">=3.3"
