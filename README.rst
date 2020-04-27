@@ -62,6 +62,10 @@ To rehost an imgur image:
 
 An uploaded URL will be printed to the console.
 
+If ``--bbcode`` parameter is specified, URLS will be wrapped in BBCode ``[img]`` tags:
+
+    ptpimg_uploader --bbcode ~/seed/mytorrent/folder.jpg
+
 If pyperclip python package is installed, the URL will be additionally copied to the clipboard.
 
 You can specify multiple files and URLs on the command line:

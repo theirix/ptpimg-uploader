@@ -145,6 +145,9 @@ def main():
             '-n', '--dont-copy', action='store_false', default=True,
             dest='clipboard',
             help='Do not copy the resulting URLs to the clipboard')
+    parser.add_argument(
+        '-b', '--bbcode', action='store_true', default=False,
+        help='Output links in BBCode format (with [img] tags)')
 
     args = parser.parse_args()
 
@@ -152,7 +155,11 @@ def main():
         parser.error('Please specify an API key')
     try:
         image_urls = upload(args.api_key, args.images)
-        print(*image_urls, sep='\n')
+        if args.bbcode:
+            printed_urls = ['[img]{}[/img]'.format(image_url) for image_url in image_urls]
+        else:
+            printed_urls = image_urls
+        print(*printed_urls, sep='\n')
         # Copy to clipboard if possible
         if getattr(args, 'clipboard', False):
             pyperclip.copy('\n'.join(image_urls))
