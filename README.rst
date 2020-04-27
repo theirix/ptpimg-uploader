@@ -41,7 +41,7 @@ You can export your ptpimg.me API key (usually in .bashrc or .zshenv) using:
 
     export PTPIMG_API_KEY=<your hex key>
 
-or use the -k / --api-key command-line switch.
+or use the ``-k`` / ``--api-key`` command-line switch.
 
 How to use
 ----------
