@@ -38,15 +38,7 @@ class PtpimgUploader:
             res['code'], res['ext'])
         return image_url
 
-    def _perform(self, files=None, **data):
-        # Compose request
-        headers = {'referer': 'https://ptpimg.me/index.php'}
-        data['api_key'] = self.api_key
-        url = 'https://ptpimg.me/upload.php'
-
-        resp = requests.post(
-            url, headers=headers, data=data, files=files, timeout=self.timeout)
-        # pylint: disable=no-member
+    def _perform(self, resp):
         if resp.status_code == requests.codes.ok:
             try:
                 # print('Successful response', r.json())
@@ -60,71 +52,80 @@ class PtpimgUploader:
             raise UploadFailed(
                 'Failed. Status {0}:\n{1}', resp.status_code, resp.content)
 
-    def upload_files(self, *filenames):
-        """ Upload files using form """
+    def upload_file(self, filename):
+        """ Upload file using form """
         # The ExitStack closes files for us when the with block exits
         with contextlib.ExitStack() as stack:
-            files = {}
-            for i, filename in enumerate(filenames):
-                open_file = stack.enter_context(open(filename, 'rb'))
-                mime_type, _ = mimetypes.guess_type(filename)
-                if not mime_type or mime_type.split('/')[0] != 'image':
-                    raise ValueError(
-                        'Unknown image file type {}'.format(mime_type))
+            file_ = {}
+            open_file = stack.enter_context(open(filename, 'rb'))
+            mime_type, _ = mimetypes.guess_type(filename)
+            if not mime_type or mime_type.split('/')[0] != 'image':
+                raise ValueError(
+                    'Unknown image file type {}'.format(mime_type))
+            
+            name = os.path.basename(filename)
+            try:
+                # until https://github.com/shazow/urllib3/issues/303 is
+                # resolved, only use the filename if it is Latin-1 safe
+                e_name = name.encode('latin-1','replace')
+                name = e_name.decode('latin-1')
+            except UnicodeEncodeError:
+                name = 'justfilename'
+            file_ = {'file-upload[]' : (
+                    name, open_file, mime_type)}
+            headers = {'referer': 'https://ptpimg.me/index.php'}
+            url = 'https://ptpimg.me/upload.php'
+            api = {'api_key' : self.api_key}
+            try:    resp = requests.post(url, headers = headers, data = api, files = file_)
+            except Exception as e:
+                pass
+        return self._perform(resp)
 
-                name = os.path.basename(filename)
-                try:
-                    # until https://github.com/shazow/urllib3/issues/303 is
-                    # resolved, only use the filename if it is Latin-1 safe
-                    name.encode('latin1')
-                except UnicodeEncodeError:
-                    name = 'justfilename'
-                files['file-upload[{}]'.format(i)] = (
-                    name, open_file, mime_type)
-            return self._perform(files=files)
+    def upload_url(self, url):
+        """ Upload image URL """
+        try:
+            mime_type, _ = mimetypes.guess_type(url)
+            if not mime_type or mime_type.split('/')[0] != "image":
+                raise ValueError("Unknown image url type {}".format(mime_type))
+            
+            url_image = {"api_key" : self.api_key,
+                        "link-upload" : (url)}
+            headers = {'referer': 'https://ptpimg.me/index.php'}
+            url = 'https://ptpimg.me/upload.php'
+            resp = requests.post(url, headers = headers, data = url_image)
 
-    def upload_urls(self, *urls):
-        """ Upload image URLs by downloading them before """
-        with contextlib.ExitStack() as stack:
-            files = {}
-            for i, url in enumerate(urls):
-                resp = requests.get(url, timeout=self.timeout)
-                if resp.status_code != requests.codes.ok:
-                    raise ValueError(
-                        'Cannot fetch url {} with error {}'.format(url, resp.status_code))
+            return self._perform(resp)
 
-                mime_type = resp.headers['content-type']
-                if not mime_type or mime_type.split('/')[0] != 'image':
-                    raise ValueError(
-                        'Unknown image file type {}'.format(mime_type))
-                open_file = stack.enter_context(BytesIO(resp.content))
-                files['file-upload[{}]'.format(i)] = (
-                    'file-{}'.format(i), open_file, mime_type)
-
-            return self._perform(files=files)
-
+        except ValueError as e:
+            print(e)
+        except Exception as e:
+            print(e)
 
 def _partition(files_or_urls):
-    files, urls = [], []
+    file_url_list = []
     for file_or_url in files_or_urls:
         if os.path.exists(file_or_url):
-            files.append(file_or_url)
+             file_url_list.append({'type': 'file',
+                                    'path': file_or_url})
         elif file_or_url.startswith('http'):
-            urls.append(file_or_url)
+           file_url_list.append({'type': 'url',
+                                    'path': file_or_url})
         else:
             raise ValueError(
                 'Not an existing file or image URL: {}'.format(file_or_url))
-    return files, urls
+    return file_url_list
 
 
 def upload(api_key, files_or_urls, timeout=None):
     uploader = PtpimgUploader(api_key, timeout)
-    files, urls = _partition(files_or_urls)
+    file_url_list = _partition(files_or_urls)
     results = []
-    if files:
-        results += uploader.upload_files(*files)
-    if urls:
-        results += uploader.upload_urls(*urls)
+    if file_url_list:
+        for file_or_url in file_url_list:
+            if file_or_url['type'] == 'file':
+                results += uploader.upload_file(file_or_url['path'])
+            elif file_or_url['type'] == 'url':
+                results += uploader.upload_url(file_or_url['path'])
     return results
 
 
