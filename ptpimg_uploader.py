@@ -62,18 +62,17 @@ class PtpimgUploader:
         """ Upload file using form """
         # The ExitStack closes files for us when the with block exits
         with contextlib.ExitStack() as stack:
-            file_ = {}
             open_file = stack.enter_context(open(filename, 'rb'))
             mime_type, _ = mimetypes.guess_type(filename)
             if not mime_type or mime_type.split('/')[0] != 'image':
                 raise ValueError(
                     'Unknown image file type {}'.format(mime_type))
-            
+
             name = os.path.basename(filename)
             try:
                 # until https://github.com/shazow/urllib3/issues/303 is
                 # resolved, only use the filename if it is Latin-1 safe
-                e_name = name.encode('latin-1','replace')
+                e_name = name.encode('latin-1', 'replace')
                 name = e_name.decode('latin-1')
             except UnicodeEncodeError:
                 name = 'justfilename'
@@ -105,20 +104,16 @@ class PtpimgUploader:
 
             return self._perform(resp)
 
-        except ValueError as e:
-            print(e)
-        except Exception as e:
-            print(e)
 
 def _partition(files_or_urls):
     file_url_list = []
     for file_or_url in files_or_urls:
         if os.path.exists(file_or_url):
-             file_url_list.append({'type': 'file',
-                                    'path': file_or_url})
+            file_url_list.append({'type': 'file',
+                                  'path': file_or_url})
         elif file_or_url.startswith('http'):
-           file_url_list.append({'type': 'url',
-                                    'path': file_or_url})
+            file_url_list.append({'type': 'url',
+                                  'path': file_or_url})
         else:
             raise ValueError(
                 'Not an existing file or image URL: {}'.format(file_or_url))
