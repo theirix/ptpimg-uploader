@@ -2,6 +2,12 @@
 Change Log
 ==========
 
+0.6 (2021-05-23)
+-----------------
+
+* Image order gets changed if urls and files are mixed in input parameter (#5).
+
+
 0.5 (2020-04-27)
 -----------------
 
