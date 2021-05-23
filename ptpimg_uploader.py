@@ -52,6 +52,12 @@ class PtpimgUploader:
             raise UploadFailed(
                 'Failed. Status {0}:\n{1}', resp.status_code, resp.content)
 
+    def _send_upload(self, files: dict):
+        headers = {'referer': 'https://ptpimg.me/index.php'}
+        data = {'api_key': self.api_key}
+        service_url = 'https://ptpimg.me/upload.php'
+        return requests.post(service_url, headers=headers, data=data, files=files)
+
     def upload_file(self, filename):
         """ Upload file using form """
         # The ExitStack closes files for us when the with block exits
