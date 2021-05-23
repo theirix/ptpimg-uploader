@@ -77,14 +77,11 @@ class PtpimgUploader:
                 name = e_name.decode('latin-1')
             except UnicodeEncodeError:
                 name = 'justfilename'
-            file_ = {'file-upload[]' : (
-                    name, open_file, mime_type)}
-            headers = {'referer': 'https://ptpimg.me/index.php'}
-            url = 'https://ptpimg.me/upload.php'
-            api = {'api_key' : self.api_key}
-            try:    resp = requests.post(url, headers = headers, data = api, files = file_)
-            except Exception as e:
-                pass
+
+            files = {'file-upload[]': (
+                name, open_file, mime_type)}
+            resp = self._send_upload(files=files)
+
         return self._perform(resp)
 
     def upload_url(self, url):
