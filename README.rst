@@ -106,7 +106,7 @@ Acknowledgments
 ---------------
 
 * mjpieters - a great refactoring and Python packaging
-
+* lukacoufyl - fixing image upload order
 
 .. |Build Status| image:: https://github.com/theirix/ptpimg-uploader/workflows/Upload%20Python%20Package/badge.svg
    :target: https://github.com/theirix/ptpimg-uploader/actions
