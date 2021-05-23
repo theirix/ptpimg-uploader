@@ -87,22 +87,21 @@ class PtpimgUploader:
     def upload_url(self, url):
         """ Upload image URL """
         with contextlib.ExitStack() as stack:
-            try:
-                resp = requests.get(url, timeout=self.timeout)
-                if resp.status_code != requests.codes.ok:
-                    raise ValueError(
-                        'Cannot fetch url {} with error {}'.format(url, resp.status_code))
+            resp = requests.get(url, timeout=self.timeout)
+            if resp.status_code != requests.codes.ok:
+                raise ValueError(
+                    'Cannot fetch url {} with error {}'.format(url, resp.status_code))
 
-                mime_type = resp.headers['content-type']
-                if not mime_type or mime_type.split('/')[0] != 'image':
-                    raise ValueError(
-                        'Unknown image file type {}'.format(mime_type))
+            mime_type = resp.headers['content-type']
+            if not mime_type or mime_type.split('/')[0] != 'image':
+                raise ValueError(
+                    'Unknown image file type {}'.format(mime_type))
 
-                open_file = stack.enter_context(BytesIO(resp.content))
+            open_file = stack.enter_context(BytesIO(resp.content))
 
-                files = {'file-upload[]': (
-                    'justfilename', open_file, mime_type)}
-                resp = self._send_upload(files)
+            files = {'file-upload[]': (
+                'justfilename', open_file, mime_type)}
+            resp = self._send_upload(files)
 
             return self._perform(resp)
 
