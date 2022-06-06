@@ -2,6 +2,11 @@
 Change Log
 ==========
 
+0.7 (2022-06-06)
+-----------------
+
+* Added --clip option to read url from clipboard
+
 0.6 (2021-05-23)
 -----------------
 
