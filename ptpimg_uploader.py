@@ -6,6 +6,7 @@ Upload image file or image URL to the ptpimg.me image hosting.
 Usage:
     python3 ptpimg-uploader.py image-file.jpg
     python3 ptpimg-uploader.py https://i.imgur.com/00000.jpg
+    python3 ptpimg-uploader.py --clip
 """
 
 import contextlib
@@ -135,14 +136,20 @@ def upload(api_key, files_or_urls, timeout=None):
 
 def main():
     import argparse
+    import sys
 
     try:
         import pyperclip
     except ImportError:
         pyperclip = None
 
+    nargs = "+"
+    if "--clip" in sys.argv and pyperclip:
+        nargs = "*"
+        print("star")
+
     parser = argparse.ArgumentParser(description="PTPImg uploader")
-    parser.add_argument('images', metavar='filename|url', nargs='+')
+    parser.add_argument('images', metavar='filename|url', nargs=nargs)
     parser.add_argument(
         '-k', '--api-key', default=os.environ.get('PTPIMG_API_KEY'),
         help='PTPImg API key (or set the PTPIMG_API_KEY environment variable)')
@@ -152,6 +159,10 @@ def main():
             dest='clipboard',
             help='Do not copy the resulting URLs to the clipboard')
     parser.add_argument(
+        '--clip', action='store_true', default=False,
+        help='copy from image from clipboard. Image can either ' +
+             'be a path to the image, a url to the image')
+    parser.add_argument(
         '-b', '--bbcode', action='store_true', default=False,
         help='Output links in BBCode format (with [img] tags)')
     parser.add_argument(
@@ -159,11 +170,14 @@ def main():
         help='Do not bell in a terminal on completion')
 
     args = parser.parse_args()
+    images = args.images
+    if args.clip:
+        images.append(pyperclip.paste())
 
     if not args.api_key:
         parser.error('Please specify an API key')
     try:
-        image_urls = upload(args.api_key, args.images)
+        image_urls = upload(args.api_key, images)
         if args.bbcode:
             printed_urls = ['[img]{}[/img]'.format(image_url) for image_url in image_urls]
         else:

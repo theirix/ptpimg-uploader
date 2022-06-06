@@ -84,6 +84,11 @@ If ``--bbcode`` parameter is specified, URLS will be wrapped in BBCode ``[img]``
 
 
 If pyperclip python package is installed, the URL will be additionally copied to the clipboard.
+Additionally, you can upload an URL from the clipboard:
+
+.. code-block:: bash
+
+    ptpimg_uploader --clip
 
 If output is a terminal, a bell will be ringed on completion (can be disabled with a ``--nobell`` parameter).
 
