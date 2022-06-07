@@ -2,6 +2,11 @@
 Change Log
 ==========
 
+0.8 (2022-06-07)
+-----------------
+
+* Use --clip option only if pyperclip installed
+
 0.7 (2022-06-06)
 -----------------
 
