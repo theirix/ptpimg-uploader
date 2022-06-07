@@ -146,7 +146,6 @@ def main():
     nargs = "+"
     if "--clip" in sys.argv and pyperclip:
         nargs = "*"
-        print("star")
 
     parser = argparse.ArgumentParser(description="PTPImg uploader")
     parser.add_argument('images', metavar='filename|url', nargs=nargs)
@@ -158,10 +157,10 @@ def main():
             '-n', '--dont-copy', action='store_false', default=True,
             dest='clipboard',
             help='Do not copy the resulting URLs to the clipboard')
-    parser.add_argument(
-        '--clip', action='store_true', default=False,
-        help='copy from image from clipboard. Image can either ' +
-             'be a path to the image, a url to the image')
+        parser.add_argument(
+            '--clip', action='store_true', default=False,
+            help='copy from image from clipboard. Image can either ' +
+                 'be a path to the image, a url to the image')
     parser.add_argument(
         '-b', '--bbcode', action='store_true', default=False,
         help='Output links in BBCode format (with [img] tags)')
