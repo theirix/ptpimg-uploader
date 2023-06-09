@@ -170,7 +170,7 @@ def main():
 
     args = parser.parse_args()
     images = args.images
-    if args.clip:
+    if pyperclip is not None and args.clip:
         images.append(pyperclip.paste())
 
     if not args.api_key:
