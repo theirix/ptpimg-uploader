@@ -2,6 +2,11 @@
 Change Log
 ==========
 
+0.9 (2023-06-09)
+-----------------
+
+* Fix problem when omitting clip parameter
+
 0.8 (2022-06-07)
 -----------------
 
