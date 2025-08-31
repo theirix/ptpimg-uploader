@@ -26,6 +26,10 @@ class UploadFailed(Exception):
         return msg.format(*args)
 
 
+class NotFoundError(ValueError):
+    """Image at file or URL is not found."""
+
+
 class PtpimgUploader:
     """Upload image or image URL to the ptpimg.me image hosting"""
 
@@ -63,7 +67,10 @@ class PtpimgUploader:
         """Upload file using form"""
         # The ExitStack closes files for us when the with block exits
         with contextlib.ExitStack() as stack:
-            open_file = stack.enter_context(open(filename, "rb"))
+            try:
+                open_file = stack.enter_context(open(filename, "rb"))
+            except FileNotFoundError:
+                raise NotFoundError("File not found {0}".format(filename))
             mime_type, _ = mimetypes.guess_type(filename)
             if not mime_type or mime_type.split("/")[0] != "image":
                 raise ValueError("Unknown image file type {}".format(mime_type))
@@ -87,11 +94,11 @@ class PtpimgUploader:
         with contextlib.ExitStack() as stack:
             resp = requests.get(url, timeout=self.timeout)
             if resp.status_code != requests.codes.ok:
-                raise ValueError(
+                raise NotFoundError(
                     "Cannot fetch url {} with error {}".format(url, resp.status_code)
                 )
 
-            mime_type = resp.headers["content-type"]
+            mime_type = resp.headers.get("content-type")
             if not mime_type or mime_type.split("/")[0] != "image":
                 raise ValueError("Unknown image file type {}".format(mime_type))
 
