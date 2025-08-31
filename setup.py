@@ -27,5 +27,11 @@ setup(
     install_requires=[
         'requests',
     ],
+    extras_require={
+        'dev': [
+            'requests-mock',
+            'black'
+        ],
+    },
     python_requires=">=3.3"
 )
