@@ -8,5 +8,5 @@ class PtptimgUploaderCase(unittest.TestCase):
         PtpimgUploader("API_KEY")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
