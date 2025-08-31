@@ -29,13 +29,13 @@ class UploadFailed(Exception):
 class PtpimgUploader:
     """Upload image or image URL to the ptpimg.me image hosting"""
 
-    def __init__(self, api_key, timeout=None):
+    def __init__(self, api_key, timeout=None, api_host="https://ptpimg.me"):
         self.api_key = api_key
         self.timeout = timeout
+        self.api_host = api_host
 
-    @staticmethod
-    def _handle_result(res):
-        image_url = "https://ptpimg.me/{0}.{1}".format(res["code"], res["ext"])
+    def _handle_result(self, res):
+        image_url = "{0}/{1}.{2}".format(self.api_host, res["code"], res["ext"])
         return image_url
 
     def _perform(self, resp):
@@ -54,9 +54,9 @@ class PtpimgUploader:
             )
 
     def _send_upload(self, files: dict):
-        headers = {"referer": "https://ptpimg.me/index.php"}
+        headers = {"referer": "{}/index.php".format(self.api_host)}
         data = {"api_key": self.api_key}
-        service_url = "https://ptpimg.me/upload.php"
+        service_url = "{}/upload.php".format(self.api_host)
         return requests.post(service_url, headers=headers, data=data, files=files)
 
     def upload_file(self, filename):
