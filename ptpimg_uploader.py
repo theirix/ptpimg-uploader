@@ -14,6 +14,7 @@ import mimetypes
 import os
 from io import BytesIO
 from sys import stdout
+import time
 
 import requests
 
@@ -61,7 +62,16 @@ class PtpimgUploader:
         headers = {"referer": "{}/index.php".format(self.api_host)}
         data = {"api_key": self.api_key}
         service_url = "{}/upload.php".format(self.api_host)
-        return requests.post(service_url, headers=headers, data=data, files=files)
+        for rem_attempt in reversed(range(5)):
+            try:
+                return requests.post(
+                    service_url, headers=headers, data=data, files=files
+                )
+            except requests.RequestException as e:
+                if rem_attempt == 0:
+                    raise e
+                time.sleep(1)
+        return None
 
     def upload_file(self, filename):
         """Upload file using form"""
@@ -92,7 +102,14 @@ class PtpimgUploader:
     def upload_url(self, url):
         """Upload image URL"""
         with contextlib.ExitStack() as stack:
-            resp = requests.get(url, timeout=self.timeout)
+            for rem_attempt in reversed(range(5)):
+                try:
+                    resp = requests.get(url, timeout=self.timeout)
+                except requests.RequestException as e:
+                    if rem_attempt == 0:
+                        raise e
+                    time.sleep(1)
+
             if resp.status_code != requests.codes.ok:
                 raise NotFoundError(
                     "Cannot fetch url {} with error {}".format(url, resp.status_code)
