@@ -2,6 +2,15 @@
 Change Log
 ==========
 
+0.10 (2025-09-04)
+-----------------
+
+* Retry network calls (#10)
+* Allow to customise ptpimg hostname
+* Add tests
+* Rework documentation
+* Using PyPi trusted publishing
+
 0.9 (2023-06-09)
 -----------------
 
@@ -48,4 +57,3 @@ Change Log
 -----------------
 
 * Initial release.
-
