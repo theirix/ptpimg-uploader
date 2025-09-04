@@ -2,20 +2,33 @@
 ptpimg_uploader
 ===============
 
-|PyPI version| |Build Status| 
+.. image:: https://img.shields.io/pypi/v/ptpimg-uploader.svg
+   :alt: PyPI version
+   :target: https://pypi.python.org/pypi/ptpimg-uploader
+
+.. image:: https://github.com/theirix/ptpimg-uploader/workflows/build/badge.svg
+    :alt: Build Status
+    :target: https://github.com/theirix/ptpimg-uploader/actions
 
 Upload image file or image URL to the ptpimg.me image hosting.
 
+Features
+--------
+
+* Upload local image files
+* Rehost images from image services (e.g., from imgur)
+* Copy resulting URL to clipboard
+* BBCode formatting support
+* Command-line and programmatic usage
 
 Installation
 ------------
 
-Using pip:
+Using pip (recommended):
 
 .. code-block:: bash
 
     pip install ptpimg_uploader
-
 
 Using setup.py:
 
@@ -23,84 +36,82 @@ Using setup.py:
 
     python setup.py install
 
+Manual Dependencies:
 
-Manually:
+* Required: ``requests`` package
+    * Debian/Ubuntu: ``apt-get install python3-requests``
+    * Other systems: ``pip3 install requests``
 
-  * Install python3 package ``requests`` (usually ``apt-get install python3-requests`` or ``pip3 install requests``).
+* Optional: ``pyperclip`` package for clipboard support
+    * Install via: ``pip3 install pyperclip``
 
-  * If you want clipboard support, install ``pyperclip`` too.
+API Key Setup
+------------
 
+1. Login to https://ptpimg.me
+2. Open browser developer tools (View -> Developer -> View Source in Chrome)
+3. Find ``api_key`` in the page source
+4. Copy the hexadecimal string (format: ``xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx``)
 
-API key
--------
+Set your API key using either:
 
-To find your PTPImg API key, login to https://ptpimg.me, open the page source
-(i.e. "View->Developer->View source" menu in Chrome), find the string api_key
-and copy the hexademical string from the value attribute. Your API key should
-look like 43fe0fee-f935-4084-8a38-3e632b0be68c.
-
-You can export your ptpimg.me API key (usually in .bashrc or .zshenv) using:
+Environment variable (recommended):
 
 .. code-block:: bash
 
-    export PTPIMG_API_KEY=<your hex key>
+    # Add to your ~/.bashrc or ~/.zshenv
+    export PTPIMG_API_KEY=your-api-key-here
 
+Or use the command-line option: ``-k`` / ``--api-key``
 
-or use the ``-k`` / ``--api-key`` command-line switch.
+Usage
+-----
 
-How to use
-----------
-
-Run
+Get help:
 
 .. code-block:: bash
 
     ptpimg_uploader -h
 
-
-to get command-line help.
-
-To upload an image file:
+Upload a local image:
 
 .. code-block:: bash
 
     ptpimg_uploader ~/seed/mytorrent/folder.jpg
 
-
-To rehost an imgur image:
+Rehost from URL:
 
 .. code-block:: bash
 
     ptpimg_uploader https://i.imgur.com/eaT6j3X.jpg
 
-
-An uploaded URL will be printed to the console.
-
-If ``--bbcode`` parameter is specified, URLS will be wrapped in BBCode ``[img]`` tags:
-
-.. code-block:: bash
-
-    ptpimg_uploader --bbcode ~/seed/mytorrent/folder.jpg
-
-
-If pyperclip python package is installed, the URL will be additionally copied to the clipboard.
-Additionally, you can upload an URL from the clipboard:
-
-.. code-block:: bash
-
-    ptpimg_uploader --clip
-
-If output is a terminal, a bell will be ringed on completion (can be disabled with a ``--nobell`` parameter).
-
-You can specify multiple files and URLs on the command line:
+Multiple uploads (mix-and-match files and URLs):
 
 .. code-block:: bash
 
     ptpimg_uploader ~/seed/mytorrent/folder.jpg https://i.imgur.com/eaT6j3X.jpg
 
+Additional command-line options
+~~~~~~~~~~~~~~~~
 
-The resulting URLs are printed each on separate line, and copied to your
-clipboard with newlines in between.
+* ``--bbcode``: URLs will be wrapped in BBCode ``[img]`` tags
+
+.. code-block:: bash
+
+    ptpimg_uploader --bbcode ~/seed/mytorrent/folder.jpg
+
+* ``--clip``: Place a resulting URL to clipboard (if `pyperclip` package is installed)
+
+.. code-block:: bash
+
+    ptpimg_uploader --clip ~/seed/mytorrent/folder.jpg
+
+* ``--nobell``: Disable completion sound. If output is a terminal, a bell will be ringed on completion.
+
+Programmatic Usage
+----------------
+
+The package can be used as a library via the ``upload`` function for programmatic access.
 
 License
 -------
@@ -112,8 +123,3 @@ Acknowledgments
 
 * mjpieters - a great refactoring and Python packaging
 * lukacoufyl - fixing image upload order
-
-.. |Build Status| image:: https://github.com/theirix/ptpimg-uploader/workflows/Upload%20Python%20Package/badge.svg
-   :target: https://github.com/theirix/ptpimg-uploader/actions
-.. |PyPI version| image:: https://img.shields.io/pypi/v/ptpimg-uploader.svg
-   :target: https://pypi.python.org/pypi/ptpimg-uploader
