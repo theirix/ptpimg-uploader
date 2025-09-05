@@ -1,6 +1,6 @@
 from setuptools import setup
 
-with open("README.rst") as desc:
+with open("README.rst", encoding="utf-8") as desc:
     long_description = desc.read()
 
 setup(
@@ -10,6 +10,7 @@ setup(
     author_email="theirix@gmail.com",
     description=("PTPImg uploader, handles local files and URLs, from the commandline"),
     long_description=long_description,
+    long_description_content_type="text/x-rst",
     license="BSD",
     keywords="image uploader",
     url="https://github.com/theirix/ptpimg-uploader",

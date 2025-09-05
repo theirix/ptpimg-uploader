@@ -46,7 +46,7 @@ Manual Dependencies:
     * Install via: ``pip3 install pyperclip``
 
 API Key Setup
-------------
+-------------
 
 1. Login to https://ptpimg.me
 2. Open browser developer tools (View -> Developer -> View Source in Chrome)
@@ -92,7 +92,7 @@ Multiple uploads (mix-and-match files and URLs):
     ptpimg_uploader ~/seed/mytorrent/folder.jpg https://i.imgur.com/eaT6j3X.jpg
 
 Additional command-line options
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * ``--bbcode``: URLs will be wrapped in BBCode ``[img]`` tags
 
@@ -109,7 +109,7 @@ Additional command-line options
 * ``--nobell``: Disable completion sound. If output is a terminal, a bell will be ringed on completion.
 
 Programmatic Usage
-----------------
+------------------
 
 The package can be used as a library via the ``upload`` function for programmatic access.
 
