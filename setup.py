@@ -5,7 +5,7 @@ with open("README.rst", encoding="utf-8") as desc:
 
 setup(
     name="ptpimg_uploader",
-    version="0.12",
+    version="0.13",
     author="theirix",
     author_email="theirix@gmail.com",
     description=("PTPImg uploader, handles local files and URLs, from the commandline"),
