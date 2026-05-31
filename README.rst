@@ -24,17 +24,52 @@ Features
 Installation
 ------------
 
-Using pip (recommended):
+Using pip (traditional install):
 
 .. code-block:: bash
 
     pip install ptpimg_uploader
 
-Using setup.py:
+This places ``ptpimg_uploader`` on your PATH — run it directly afterwards:
 
 .. code-block:: bash
 
-    python setup.py install
+    ptpimg_uploader image.jpg
+
+To upgrade an existing installation:
+
+.. code-block:: bash
+
+    pip install --upgrade ptpimg_uploader
+
+Using uv (no Python setup required):
+
+Install uv from https://docs.astral.sh/uv/getting-started/installation/, then:
+
+Install permanently and run as a regular command (same workflow as pip):
+
+.. code-block:: bash
+
+    uv tool install ptpimg_uploader
+    ptpimg_uploader image.jpg
+
+To upgrade:
+
+.. code-block:: bash
+
+    uv tool upgrade ptpimg_uploader
+
+Run once without installing (useful for trying it out):
+
+.. code-block:: bash
+
+    uvx ptpimg_uploader image.jpg
+
+Run the raw script directly (uv auto-installs dependencies):
+
+.. code-block:: bash
+
+    uv run ptpimg_uploader.py image.jpg
 
 Manual Dependencies:
 
@@ -44,6 +79,7 @@ Manual Dependencies:
 
 * Optional: ``pyperclip`` package for clipboard support
     * Install via: ``pip3 install pyperclip``
+    * With uv: ``uv run --with pyperclip ptpimg_uploader.py --clip image.jpg``
 
 API Key Setup
 -------------
