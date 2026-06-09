@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.3"
+# dependencies = [
+#   "requests",
+# ]
+# ///
 # pylint: disable=invalid-name
 """
 Upload image file or image URL to the ptpimg.me image hosting.

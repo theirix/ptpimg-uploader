@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ptpimg_uploader"
+version = "0.13"
+description = "PTPImg uploader, handles local files and URLs, from the commandline"
+readme = {file = "README.rst", content-type = "text/x-rst"}
+license = {text = "BSD"}
+authors = [{name = "theirix", email = "theirix@gmail.com"}]
+keywords = ["image", "uploader"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.3"
+dependencies = ["requests"]
+
+[project.optional-dependencies]
+dev = ["requests-mock", "black", "pytest"]
+
+[project.scripts]
+ptpimg_uploader = "ptpimg_uploader:main"
+
+[project.urls]
+Homepage = "https://github.com/theirix/ptpimg-uploader"
