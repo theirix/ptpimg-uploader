@@ -160,6 +160,32 @@ def upload(api_key, files_or_urls, timeout=None):
     return results
 
 
+def _api_key_missing_message():
+    """Return a helpful message telling the user how to set the API key."""
+    if os.name == "nt":
+        return (
+            "No API key found. Set it permanently via PowerShell:\n"
+            '    [System.Environment]::SetEnvironmentVariable("PTPIMG_API_KEY", "YOUR_KEY_HERE", "User")\n'
+            "Or for the current session only:\n"
+            '    $env:PTPIMG_API_KEY = "YOUR_KEY_HERE"\n'
+            "Or pass it directly: ptpimg_uploader -k YOUR_KEY_HERE"
+        )
+    shell = os.environ.get("SHELL", "")
+    if "zsh" in shell:
+        rc_file = "~/.zshrc"
+    elif "bash" in shell:
+        rc_file = "~/.bashrc"
+    else:
+        rc_file = "~/.bashrc or ~/.zshrc"
+    return (
+        "No API key found.\n"
+        "Add this line to {0}:\n"
+        "    export PTPIMG_API_KEY=YOUR_KEY_HERE\n"
+        "Then open your shell again and launch this script.\n"
+        "Or pass it directly: ptpimg_uploader -k YOUR_KEY_HERE"
+    ).format(rc_file)
+
+
 def main():
     import argparse
     import sys
@@ -217,7 +243,7 @@ def main():
         images.append(pyperclip.paste())
 
     if not args.api_key:
-        parser.error("Please specify an API key")
+        parser.error(_api_key_missing_message())
     try:
         image_urls = upload(args.api_key, images)
         if args.bbcode:
