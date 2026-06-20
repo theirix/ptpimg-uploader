@@ -6,6 +6,7 @@ Change Log
 -----------------
 
 * Use UV
+* Improve message for API key missing
 
 0.13 (2025-09-05)
 -----------------
